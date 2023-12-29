@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/allVideosFragment">
+
+    <fragment
+        android:id="@+id/allVideosFragment"
+        android:name="com.shahbaz.videoplayer.fragment.AllVideosFragment"
+        android:label="fragment_all_videos"
+        tools:layout="@layout/fragment_all_videos" />
+    <fragment
+        android:id="@+id/allFolderFragment"
+        android:name="com.shahbaz.videoplayer.fragment.AllFolderFragment"
+        android:label="fragment_all_folder"
+        tools:layout="@layout/fragment_all_folder" />
+</navigation>

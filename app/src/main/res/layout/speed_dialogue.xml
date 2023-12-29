@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/decreaseButton"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:src="@drawable/decrease_speed"
+            android:background="?attr/selectableItemBackground"
+            android:focusable="true"
+            android:tint="@color/white"
+            android:layout_weight="1"
+            />
+
+        <TextView
+            android:id="@+id/tvSpeed"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:text="1.0"
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="20sp"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/increaseButton"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:src="@drawable/increaase_speed"
+            android:background="?attr/selectableItemBackground"
+            android:focusable="true"
+            android:tint="@color/white"
+            android:layout_weight="1"
+            />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="2dp"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/videoImage"
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:src="@drawable/nav_header"
+        android:scaleType="centerCrop"
+        android:background="@drawable/video_view_image_design"
+        android:contentDescription="video Image"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="5dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/videoName"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:text="video name"
+            android:maxLines="1"
+            android:textColor="@color/black"
+            android:gravity="center_vertical"/>
+        <TextView
+            android:id="@+id/videoFolderName"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:text="video Folder"
+            android:gravity="center_vertical"/>
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/videoDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:textColor="@color/black"
+        android:text="00:00"
+        android:layout_gravity="center"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="2dp"/>
+
+</LinearLayout>
