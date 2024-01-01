@@ -9,7 +9,7 @@
     
     
     //custom theme
-    <style name="coolpink" parent="Theme.AppCompat.Light">
+    <style name="coolpink" parent="Theme.MaterialComponents.Light">
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryVariant">@color/cool_pink</item>
         <item name="colorPrimaryDark">@color/cool_pink</item>

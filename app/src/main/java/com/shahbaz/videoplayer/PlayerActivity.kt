@@ -60,6 +60,7 @@ class PlayerActivity : AppCompatActivity() {
         var speed: Float = 1.0f
         var timer: Timer? = null
         var pipStatus: Int = 0
+        var nowPlayingId: String=""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,19 +117,36 @@ class PlayerActivity : AppCompatActivity() {
             "AllVideos" -> {
                 playerlist = ArrayList()
                 playerlist.addAll(MainActivity.videoList)
+                createPlayer()
             }
 
             "FolderActivity" -> {
                 playerlist = ArrayList()
                 playerlist.addAll(FolderVideoActivity.currentFolderVideos)
+                createPlayer()
             }
 
             "searchView" -> {
                 playerlist = ArrayList()
                 playerlist.addAll(MainActivity.searchList)
+                createPlayer()
             }
+
+            "nowPlaying"-> {
+                speed = 1.0f
+                binding.videoTitle.apply {
+                    text = playerlist[position].title
+                    isSelected = true
+                }
+                binding.playerview.player = player
+                playVideo()
+                playInFullScreen(enable = isFullScreen)
+                setVisibility()
+            }
+
+
         }
-        createPlayer()
+//        createPlayer()
 
     }
 
@@ -481,8 +499,8 @@ class PlayerActivity : AppCompatActivity() {
         })
 
         playInFullScreen(enable = isFullScreen)
-
         setVisibility()
+        nowPlayingId= playerlist[position].id
 
     }
 
@@ -547,9 +565,31 @@ class PlayerActivity : AppCompatActivity() {
     }
 
 
+
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        if(pipStatus != 0){
+            finish()
+            val intent = Intent(this, PlayerActivity::class.java)
+            when(pipStatus){
+                1 -> intent.putExtra("Class","FolderActivity")
+                2 -> intent.putExtra("Class","SearchedVideos")
+                3 -> intent.putExtra("Class","AllVideos")
+            }
+            startActivity(intent)
+        }
+        if(!isInPictureInPictureMode) pauseVideo()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        player.release()
+        player.pause()
     }
 
 
@@ -557,4 +597,6 @@ class PlayerActivity : AppCompatActivity() {
         finish()
         return true
     }
+
+
 }

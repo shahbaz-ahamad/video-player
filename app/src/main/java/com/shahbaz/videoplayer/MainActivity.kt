@@ -22,7 +22,12 @@ import kotlin.system.exitProcess
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_AUDIO
 import android.Manifest.permission.READ_MEDIA_VIDEO
+import android.graphics.drawable.ColorDrawable
 import android.util.Log
+import android.view.LayoutInflater
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.shahbaz.videoplayer.databinding.SpeedDialogueBinding
+import com.shahbaz.videoplayer.databinding.ThemeDialogueBinding
 import com.shahbaz.videoplayer.dataclass.Folder
 
 
@@ -45,14 +50,26 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.feedback -> Toast.makeText(this, "Feedback", Toast.LENGTH_SHORT).show()
-                R.id.themes_nav -> Toast.makeText(this, "theme", Toast.LENGTH_SHORT).show()
+                R.id.themes_nav -> {
+                    showThemeDialgoue()
+                }
                 R.id.sort_order -> Toast.makeText(this, "sort", Toast.LENGTH_SHORT).show()
                 R.id.about -> Toast.makeText(this, "about", Toast.LENGTH_SHORT).show()
                 R.id.exit -> exitProcess(1)
             }
             return@setNavigationItemSelectedListener true
         }
+    }
+
+    private fun showThemeDialgoue() {
+        val customDilogueTheme =
+            LayoutInflater.from(this).inflate(R.layout.theme_dialogue, binding.root, false)
+        val bindingTheme = ThemeDialogueBinding.bind(customDilogueTheme)
+        val themeDialogue = MaterialAlertDialogBuilder(this).setView(customDilogueTheme)
+            .setTitle("Select Color...")
+            .create()
+
+        themeDialogue.show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -1,5 +1,6 @@
 package com.shahbaz.videoplayer.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,8 +11,10 @@ import android.view.ViewGroup
 import android.widget.Adapter
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shahbaz.videoplayer.MainActivity
+import com.shahbaz.videoplayer.PlayerActivity
 import com.shahbaz.videoplayer.R
 import com.shahbaz.videoplayer.adapter.VideoAdapter
 import com.shahbaz.videoplayer.databinding.FragmentAllVideosBinding
@@ -39,6 +42,12 @@ class AllVideosFragment : Fragment() {
         videoAdapter = VideoAdapter(MainActivity.videoList)
         setupRecyclerview()
         binding.tvTotalVideos.text="Total Video:${MainActivity.videoList.size.toString()}"
+
+        binding.nowPlaying.setOnClickListener {
+            val intent = Intent(requireContext(), PlayerActivity::class.java)
+            intent.putExtra("Class","nowPlaying")
+            startActivity(intent)
+        }
     }
 
     private fun setupRecyclerview() {
@@ -76,5 +85,12 @@ class AllVideosFragment : Fragment() {
 
         })
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(PlayerActivity.position != -1){
+            binding.nowPlaying.visibility=View.VISIBLE
+        }
     }
 }

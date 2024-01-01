@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragment.AllVideosFragment"
     android:orientation="vertical">
 
@@ -15,7 +15,10 @@
         android:layout_height="wrap_content"
         android:text="Total Videos:"
         android:layout_margin="10dp"
-        android:textColor="@color/black"/>
+        android:textColor="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewVideo"
@@ -23,6 +26,27 @@
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         android:layout_margin="10dp"
-        android:scrollbarThumbVertical="@drawable/box"/>
+        android:scrollbarThumbVertical="@drawable/box"
+        app:layout_constraintTop_toBottomOf="@id/tvTotalVideos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/nowPlaying"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/white"
+        app:icon="@drawable/play"
+        app:iconSize="30dp"
+        app:iconTint="@color/cool_pink"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.939"
+        app:strokeColor="@color/cool_pink"
+        app:strokeWidth="2dp"
+        android:visibility="invisible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
