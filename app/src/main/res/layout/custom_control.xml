@@ -1,62 +1,185 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_gravity="bottom"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-  <com.google.android.exoplayer2.ui.DefaultTimeBar
-      android:id="@id/exo_progress"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      app:scrubber_color="@color/white"
-      app:played_color="@color/white"
-      app:unplayed_color="#80FFFFFF"
-      app:buffered_color="#80FFFFFF"
-      app:scrubber_enabled_size="10dp"
-      app:scrubber_disabled_size="5dp"
-      android:layout_marginHorizontal="5dp"/>
-
-
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
-
-    <TextView android:id="@id/exo_position"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textSize="16sp"
-      android:textStyle="bold"
-        android:text="00:00"
-        android:layout_margin="10dp"
-      android:textColor="@color/white"/>
-
-
-    <TextView
-        android:layout_width="wrap_content"
+    <com.google.android.exoplayer2.ui.DefaultTimeBar
+        android:id="@id/exo_progress"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:text=":"
-        android:layout_marginVertical="10dp"
-        android:textColor="@color/white"/>
+        android:layout_marginHorizontal="5dp"
+        app:buffered_color="#80FFFFFF"
+        app:layout_constraintBottom_toTopOf="@id/bottom_controller"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:played_color="@color/white"
+        app:scrubber_color="@color/white"
+        app:scrubber_disabled_size="10dp"
+        app:scrubber_enabled_size="15dp"
+        app:unplayed_color="#80FFFFFF" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/top_controller"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="back_button"
+            android:src="@drawable/back_icon"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/video_title"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_weight="1"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="Video Name"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/moreFeatures"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="60dp"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="menu_button"
+            android:src="@drawable/menu"
+            app:tint="@color/white" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-    <TextView android:id="@id/exo_duration"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textSize="16sp"
-      android:textStyle="bold"
-        android:text="Loading.."
-        android:layout_margin="10dp"
-      android:textColor="@color/white"/>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/bottom_controller"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:gravity="end|bottom"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="parent">
 
-  </LinearLayout>
+        <ImageButton
+            android:id="@+id/repeatBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="repeat"
+            android:src="@drawable/exo_controls_repeat_off"
+            app:tint="@color/white" />
 
-</LinearLayout>
+
+        <ImageButton
+            android:id="@+id/prevButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="previous_button"
+            android:src="@drawable/previous"
+            app:tint="@color/white" />
+
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="next_button"
+            android:src="@drawable/next"
+            app:tint="@color/white" />
+
+        <ImageButton
+            android:id="@+id/fullscreenButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="full_button"
+            android:src="@drawable/fullscreen"
+            app:tint="@color/white" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+    <ImageButton
+        android:id="@+id/playPuuseButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:contentDescription="play_pause_button"
+        android:focusable="true"
+        android:src="@drawable/play"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="640dp">
+
+        <TextView
+            android:id="@id/exo_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="00:00"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:text=":"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+
+        <TextView
+            android:id="@id/exo_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="Loading.."
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

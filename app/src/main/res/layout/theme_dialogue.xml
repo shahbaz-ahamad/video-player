@@ -35,7 +35,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/circle_icon"
-            android:tint="@android:color/holo_purple"/>
+            android:tint="@android:color/holo_purple" />
     </LinearLayout>
 
     <LinearLayout

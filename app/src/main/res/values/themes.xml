@@ -6,26 +6,89 @@
     </style>
 
     <style name="Theme.VideoPlayer" parent="Base.Theme.VideoPlayer" />
+
+
+    <attr name="ThemeColor" format="color"/>
     
     
     //custom theme
     <style name="coolpink" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@color/cool_pink</item>
         <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryVariant">@color/cool_pink</item>
-        <item name="colorPrimaryDark">@color/cool_pink</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
         <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/cool_pink</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="coolBlue" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@color/cool_blue</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="coolGreen" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@color/cool_green</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="coolPurple" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@android:color/holo_purple</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="coolRed" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@android:color/holo_red_dark</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <style name="coolBlack" parent="Theme.MaterialComponents.Light">
+        <item name="ThemeColor">@color/black</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
+        <item name="android:statusBarColor">?attr/ThemeColor</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
 
+
+
     //theme for the player activity
     <style name="playerActivity" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryVariant">@color/cool_pink</item>
-        <item name="colorPrimaryDark">@color/cool_pink</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/cool_pink</item>
+
+        <item name="colorPrimary">?attr/ThemeColor</item>
+        <item name="colorPrimaryVariant">?attr/ThemeColor</item>
+        <item name="colorPrimaryDark">?attr/ThemeColor</item>
+        <item name="colorOnPrimary">?attr/ThemeColor</item>
+        <item name="colorSecondary">?attr/ThemeColor</item>
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 

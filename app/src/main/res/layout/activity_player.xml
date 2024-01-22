@@ -7,59 +7,32 @@
     android:background="@color/black"
     tools:context=".PlayerActivity">
 
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/playerview"
+
+
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:keepScreenOn="true"
-        app:controller_layout_id="@layout/custom_control" />
+        android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/top_controller"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/backButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="back_button"
-            android:src="@drawable/back_icon"
-            app:tint="@color/white" />
-
-        <TextView
-            android:id="@+id/video_title"
-            android:layout_width="0dp"
+        <com.github.vkay94.dtpv.DoubleTapPlayerView
+            android:id="@+id/playerview"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_weight="1"
-            android:ellipsize="marquee"
-            android:gravity="center"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:singleLine="true"
-            android:text="Video Name"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:keepScreenOn="true"
+            app:controller_layout_id="@layout/custom_control"
+            app:show_buffering="always"
+            android:background="@color/black"
+            app:dtpv_controller="@id/ytOVerlay"/>
 
-        <ImageButton
-            android:id="@+id/moreFeatures"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="60dp"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="menu_button"
-            android:src="@drawable/menu"
-            app:tint="@color/white" />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+        <com.github.vkay94.dtpv.youtube.YouTubeOverlay
+            android:id="@+id/ytOVerlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:yt_playerView="@id/playerview"
+            android:background="#77000000"
+            android:visibility="invisible"
+         />
+    </FrameLayout>
 
     <ImageButton
         android:id="@+id/lockButton"
@@ -72,123 +45,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/white" />
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:id="@+id/bottom_controller"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="end|bottom"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintEnd_toStartOf="parent">
-
-        <ImageButton
-            android:id="@+id/repeatBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="repeat"
-            android:src="@drawable/exo_controls_repeat_off"
-            app:tint="@color/white" />
-
-
-        <ImageButton
-            android:id="@+id/prevButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="previous_button"
-            android:src="@drawable/previous"
-            app:tint="@color/white" />
-
-        <ImageButton
-            android:id="@+id/nextButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="next_button"
-            android:src="@drawable/next"
-            app:tint="@color/white" />
-
-        <ImageButton
-            android:id="@+id/fullscreenButton"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:backgroundTint="@android:color/transparent"
-            android:contentDescription="full_button"
-            android:src="@drawable/fullscreen"
-            app:tint="@color/white" />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <FrameLayout
-            android:id="@+id/rewindFrameLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:id="@+id/rewindButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:contentDescription="rewind_button"
-                android:src="@drawable/rewind_button"
-                app:tint="@color/white"
-                android:background="@android:color/transparent"
-                android:clickable="false"
-                android:visibility="gone"
-                />
-        </FrameLayout>
-
-        <ImageButton
-            android:id="@+id/playPuuseButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:contentDescription="play_pause_button"
-            android:focusable="true"
-            android:src="@drawable/play"
-            app:tint="@color/white"
-            />
-
-        <FrameLayout
-            android:id="@+id/forwardFrameLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:id="@+id/forwardButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:contentDescription="forwardbutton"
-                android:src="@drawable/forward_button"
-                app:tint="@color/white"
-                android:background="@android:color/transparent"
-                android:clickable="false"
-                android:visibility="gone"
-                />
-        </FrameLayout>
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

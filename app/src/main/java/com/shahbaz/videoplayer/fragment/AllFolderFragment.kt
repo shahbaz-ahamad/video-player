@@ -17,6 +17,7 @@ class AllFolderFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        requireContext().theme.applyStyle(MainActivity.themeList[MainActivity.themeIndex],true)
         // Inflate the layout for this fragment
         binding= FragmentAllFolderBinding.inflate(inflater,container,false)
         return binding.root
@@ -25,6 +26,8 @@ class AllFolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerview()
+
+        binding.tvTotalFolder.text="Total Folder:${MainActivity.folderList.size}"
     }
 
     private fun setupRecyclerview() {

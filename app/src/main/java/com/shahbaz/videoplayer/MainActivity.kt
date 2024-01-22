@@ -22,22 +22,50 @@ import kotlin.system.exitProcess
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_AUDIO
 import android.Manifest.permission.READ_MEDIA_VIDEO
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.shahbaz.videoplayer.databinding.SpeedDialogueBinding
 import com.shahbaz.videoplayer.databinding.ThemeDialogueBinding
 import com.shahbaz.videoplayer.dataclass.Folder
+import com.shahbaz.videoplayer.helper.getAllVideos
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var toggle: ActionBarDrawerToggle
+    private  var runnable: Runnable?= null
+    companion object {
+        private const val READ_EXTERNAL_STORAGE_REQUEST = 123
+        lateinit var videoList : ArrayList<Video>
+        lateinit var folderList : ArrayList<Folder>
+        var sortValue : Int =0
+        lateinit var searchList : ArrayList<Video>
+        var search : Boolean = false
+        var themeIndex: Int =1
+        val themeList = arrayOf(R.style.coolpink,R.style.coolBlue,R.style.coolPurple,R.style.coolGreen,R.style.coolRed,R.style.coolBlack)
+        var dataChanged:Boolean = false
+        var adapterChanged:Boolean = false
+        val sortList = arrayOf(MediaStore.Video.Media.DATE_ADDED +" DESC",MediaStore.Video.Media.DATE_ADDED,
+            MediaStore.Video.Media.TITLE,MediaStore.Video.Media.TITLE+" DESC",MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.SIZE+" DESC")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //retrieve theme index
+        val indexEditor = getSharedPreferences("Theme", MODE_PRIVATE)
+        themeIndex= indexEditor.getInt("themeIndex",0)
+        setTheme(themeList[themeIndex])
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setTheme(R.style.coolpink)
         setContentView(binding.root)
         setupBottomViewWithNavController()
         videoList = ArrayList()
@@ -49,16 +77,39 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         binding.navView.setNavigationItemSelectedListener {
+
             when (it.itemId) {
                 R.id.themes_nav -> {
                     showThemeDialgoue()
                 }
-                R.id.sort_order -> Toast.makeText(this, "sort", Toast.LENGTH_SHORT).show()
+                R.id.sort_order -> {
+                    sortVideos()
+                }
                 R.id.about -> Toast.makeText(this, "about", Toast.LENGTH_SHORT).show()
                 R.id.exit -> exitProcess(1)
             }
             return@setNavigationItemSelectedListener true
         }
+    }
+
+    private fun sortVideos() {
+        val menuItmes = arrayOf("Latest","Oldest","Name(A to Z)","Name(Z to A)","File Size(small)","File Size(large)")
+        var value = sortValue
+        val sortDialogue = MaterialAlertDialogBuilder(this)
+            .setTitle("Sort By...")
+            .setPositiveButton("Ok"){self,_ ->
+                saveSorting(value)
+
+            }
+            .setSingleChoiceItems(menuItmes, sortValue){ _, pos ->
+                value =pos
+            }
+            .create()
+        sortDialogue.show()
+
+        //to set the color of the button according to the theme
+        sortDialogue.getButton(AlertDialog.BUTTON_POSITIVE).setBackgroundColor(MaterialColors.getColor(this,R.attr.ThemeColor,Color.RED))
+
     }
 
     private fun showThemeDialgoue() {
@@ -68,8 +119,37 @@ class MainActivity : AppCompatActivity() {
         val themeDialogue = MaterialAlertDialogBuilder(this).setView(customDilogueTheme)
             .setTitle("Select Color...")
             .create()
-
         themeDialogue.show()
+
+        //set the background to yellow to the of the selected background
+        when(themeIndex){
+            0-> bindingTheme.themePink.setBackgroundColor(Color.YELLOW)
+            1-> bindingTheme.themeBlue.setBackgroundColor(Color.YELLOW)
+            2-> bindingTheme.themePurple.setBackgroundColor(Color.YELLOW)
+            3-> bindingTheme.themeGreen.setBackgroundColor(Color.YELLOW)
+            4-> bindingTheme.themeRed.setBackgroundColor(Color.YELLOW)
+            5-> bindingTheme.themeBlack.setBackgroundColor(Color.YELLOW)
+        }
+
+        //choose the theme
+        bindingTheme.themePink.setOnClickListener {
+           saveTheme(0)
+        }
+        bindingTheme.themeBlue.setOnClickListener {
+            saveTheme(1)
+        }
+        bindingTheme.themePurple.setOnClickListener {
+            saveTheme(2)
+        }
+        bindingTheme.themeGreen.setOnClickListener {
+            saveTheme(3)
+        }
+        bindingTheme.themeRed.setOnClickListener {
+            saveTheme(4)
+        }
+        bindingTheme.themeBlack.setOnClickListener {
+            saveTheme(5)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -87,75 +167,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigationView.setupWithNavController(navController)
     }
 
-    private fun getAllVideos(): ArrayList<Video>{
-        val tempList = ArrayList<Video>()
-        val tempFolder = ArrayList<String>()
-        val projection = arrayOf(
-            MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.TITLE,
-            MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media.DATA,
-            MediaStore.Video.Media.DATE_ADDED,
-            MediaStore.Video.Media.BUCKET_ID
-        )
-        val cursor = this.contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            null,
-            null,
-            MediaStore.Video.Media.DATE_ADDED + " DESC"
-        )
 
-        if (cursor != null) {
-            val titleIndex = cursor.getColumnIndex(MediaStore.Video.Media.TITLE)
-            val videoIdIndex = cursor.getColumnIndex(MediaStore.Video.Media._ID)
-            val bucketDisplayNameIndex =
-                cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
-            val sizeIndex = cursor.getColumnIndex(MediaStore.Video.Media.SIZE)
-            val pathIndex = cursor.getColumnIndex(MediaStore.Video.Media.DATA)
-            val durationIndex = cursor.getColumnIndex(MediaStore.Video.Media.DURATION)
-            val bucketIdIndex = cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_ID)
-
-
-            while (cursor.moveToNext()) {
-                val title = if (titleIndex != -1) cursor.getString(titleIndex) else ""
-                val size = if (sizeIndex != -1) cursor.getLong(sizeIndex) else 0
-                val videoId = if (videoIdIndex != -1) cursor.getLong(videoIdIndex) else 0
-                val bucketDisplayName =
-                    if (bucketDisplayNameIndex != -1) cursor.getString(bucketDisplayNameIndex) else ""
-                val bucketId = if(bucketIdIndex != -1) cursor.getLong(bucketIdIndex) else 0
-
-                val path = if (pathIndex != -1) cursor.getString(pathIndex) else ""
-                val duration = if (durationIndex != -1) cursor.getLong(durationIndex) else 0
-
-
-                try {
-                    val file = File(path)
-                    val uri =Uri.fromFile(file)
-                    val video = Video(videoId.toString(),title,duration,bucketDisplayName,size.toString(),path,uri)
-
-                    if(file.exists()){
-                        tempList.add(video)
-                    }
-
-                        if(!tempFolder.contains(bucketDisplayName)){
-                            tempFolder.add(bucketDisplayName)
-                            //adding the folder to the folder list
-                            val folder = Folder(bucketId.toString(),bucketDisplayName.toString())
-                            folderList.add(folder)//adding the folder to the folder list
-                        }
-
-
-                }catch (_: Exception){}
-
-            }
-        }
-        cursor?.close()
-
-        return tempList
-    }
 
     private fun checkPermission(){
         // Check if the permission is already granted
@@ -169,7 +181,19 @@ class MainActivity : AppCompatActivity() {
             ) == PackageManager.PERMISSION_GRANTED)  {
             // Permission is already granted
             // You can proceed with accessing videos or other functionalities
-            videoList= getAllVideos()
+            runnable = Runnable {
+                if (runnable != null && dataChanged) {
+                    videoList = getAllVideos(this@MainActivity)
+                    dataChanged = false
+                    adapterChanged = true
+                }
+                if (runnable != null) {
+                    Handler(Looper.getMainLooper()).postDelayed(runnable!!, 300)
+                }
+            }
+            Handler(Looper.getMainLooper()).postDelayed(runnable!!, 0)
+            videoList = getAllVideos(this@MainActivity)
+
         } else {
             // Permission is not granted, request it
             requestStoragePermission()
@@ -200,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             READ_EXTERNAL_STORAGE_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults.isNotEmpty() && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted, proceed with accessing videos
-                    videoList= getAllVideos()
+                    videoList= getAllVideos(this@MainActivity)
                 } else {
                     // Permission denied, handle this case (show a message, disable features, etc.)
                     // You may want to inform the user why the permission is necessary
@@ -214,16 +238,28 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    companion object {
-        private const val READ_EXTERNAL_STORAGE_REQUEST = 123
-        lateinit var videoList : ArrayList<Video>
-        lateinit var folderList : ArrayList<Folder>
+    private fun saveTheme(index : Int){
+        val indexeditor = getSharedPreferences("Theme", MODE_PRIVATE).edit()
+        indexeditor.putInt("themeIndex",index)
+        indexeditor.apply()
 
-        lateinit var searchList : ArrayList<Video>
-        var search : Boolean = false
+            //for restarting app
+        finish()
+        startActivity(intent)
+    }
 
+    private fun saveSorting(index : Int){
+        val sorteditor = getSharedPreferences("Sort", MODE_PRIVATE).edit()
+        sorteditor.putInt("sortIndex",index)
+        sorteditor.apply()
+        //for restarting app
+        finish()
+        startActivity(intent)
     }
 
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        runnable= null
+    }
 }

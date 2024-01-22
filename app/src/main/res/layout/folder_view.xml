@@ -18,7 +18,7 @@
         android:src="@drawable/all_folder"
         android:scaleType="centerCrop"
         android:contentDescription="Folder Image"
-        app:tint="@color/cool_pink" />
+        app:tint="?attr/ThemeColor" />
 
     
     <TextView

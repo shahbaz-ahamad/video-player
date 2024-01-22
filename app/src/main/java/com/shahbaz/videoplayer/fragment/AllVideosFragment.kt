@@ -1,6 +1,7 @@
 package com.shahbaz.videoplayer.fragment
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.shahbaz.videoplayer.PlayerActivity
 import com.shahbaz.videoplayer.R
 import com.shahbaz.videoplayer.adapter.VideoAdapter
 import com.shahbaz.videoplayer.databinding.FragmentAllVideosBinding
+import com.shahbaz.videoplayer.helper.getAllVideos
 
 
 class AllVideosFragment : Fragment() {
@@ -32,6 +34,7 @@ class AllVideosFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        requireContext().theme.applyStyle(MainActivity.themeList[MainActivity.themeIndex],true)
         // Inflate the layout for this fragment
         binding= FragmentAllVideosBinding.inflate(inflater,container,false)
         return binding.root
@@ -48,6 +51,16 @@ class AllVideosFragment : Fragment() {
             intent.putExtra("Class","nowPlaying")
             startActivity(intent)
         }
+
+        binding.root.setOnRefreshListener {
+
+            MainActivity.videoList= getAllVideos(requireContext())
+            videoAdapter.updateList(MainActivity.videoList)
+            binding.tvTotalVideos.text="Total Video:${MainActivity.videoList.size.toString()}"
+            binding.root.isRefreshing=false
+        }
+
+
     }
 
     private fun setupRecyclerview() {
@@ -91,6 +104,10 @@ class AllVideosFragment : Fragment() {
         super.onResume()
         if(PlayerActivity.position != -1){
             binding.nowPlaying.visibility=View.VISIBLE
+        }
+        if(MainActivity.adapterChanged){
+            videoAdapter.notifyDataSetChanged()
+            MainActivity.adapterChanged=false
         }
     }
 }

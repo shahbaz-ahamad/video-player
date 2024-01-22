@@ -18,8 +18,8 @@ class FolderVideoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(MainActivity.themeList[MainActivity.themeIndex])
         binding=ActivityFolderVideoBinding.inflate(layoutInflater)
-        setTheme(R.style.coolpink)
         setContentView(binding.root)
         currentFolderVideos= ArrayList()
 
@@ -49,7 +49,6 @@ class FolderVideoActivity : AppCompatActivity() {
 
     private fun getAllVideos(folderId : String): ArrayList<Video>{
         val tempList = ArrayList<Video>()
-
         val selection = MediaStore.Video.Media.BUCKET_ID + " like? "
         val projection = arrayOf(
             MediaStore.Video.Media._ID,

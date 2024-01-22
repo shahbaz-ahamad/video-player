@@ -8,47 +8,63 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.media.AudioManager
 import android.media.browse.MediaBrowser.MediaItem
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.DocumentsContract
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.github.vkay94.dtpv.youtube.YouTubeOverlay
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout.AspectRatioListener
+import com.google.android.exoplayer2.ui.DefaultTimeBar
+import com.google.android.exoplayer2.ui.TimeBar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.shahbaz.videoplayer.databinding.ActivityPlayerBinding
 import com.shahbaz.videoplayer.databinding.MoreFeaturesBinding
 import com.shahbaz.videoplayer.databinding.SpeedDialogueBinding
 import com.shahbaz.videoplayer.dataclass.Video
+import java.io.File
 import java.text.DecimalFormat
 import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.system.exitProcess
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity(), AudioManager.OnAudioFocusChangeListener {
     private lateinit var binding: ActivityPlayerBinding
-    private lateinit var runnable: Runnable
+    private lateinit var playPuuseButton: ImageButton
+    private lateinit var fullscreenButton: ImageButton
+    private lateinit var videoTitle: TextView
 
     companion object {
+        private var audioManager: AudioManager? = null
         lateinit var player: SimpleExoPlayer
         lateinit var playerlist: ArrayList<Video>
         var position: Int = -1
@@ -60,12 +76,12 @@ class PlayerActivity : AppCompatActivity() {
         var speed: Float = 1.0f
         var timer: Timer? = null
         var pipStatus: Int = 0
-        var nowPlayingId: String=""
+        var nowPlayingId: String = ""
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        setTheme(MainActivity.themeList[MainActivity.themeIndex])
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         //to display the video arround the edge of the camera
@@ -76,8 +92,12 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
 
         supportActionBar?.hide()
-        setTheme(R.style.playerActivity)
         setContentView(binding.root)
+
+        //find the id of the custom control
+        playPuuseButton = findViewById(R.id.playPuuseButton)
+        videoTitle = findViewById(R.id.video_title)
+        fullscreenButton = findViewById(R.id.fullscreenButton)
 
         //for the full screen mode
         WindowCompat.setDecorFitsSystemWindows(window, false)//false to hide the status bar
@@ -89,24 +109,47 @@ class PlayerActivity : AppCompatActivity() {
         }
 
 
-        initalizeLayout()
-        initilizeBinding()
+        //for handling video file intent
+        try {
+            if (intent?.data != null && intent.data?.scheme?.contentEquals("content") == true) {
+                playerlist = ArrayList()
+                position = 0
+                val cursor = contentResolver.query(
+                    intent.data!!,
+                    arrayOf(MediaStore.Video.Media.DATA),
+                    null,
+                    null,
+                    null
+                )
+                cursor?.let {
+                    it.moveToFirst()
+                    try {
+                        val path =
+                            it.getString(it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))
+                        val file = File(path)
+                        val video = Video("", file.name, 0L, "", "", "", Uri.fromFile(file))
+                        playerlist.add(video)
+                        cursor.close()
+                    } catch (e: Exception) {
+                        val tempPath = getPathFromURI(context = this, uri = intent.data!!)
+                        val tempFile = File(tempPath)
+                        val video = Video("", tempFile.name, 0L, "", "", "", Uri.fromFile(tempFile))
+                        playerlist.add(video)
+                        cursor.close()
+                    }
 
-        binding.forwardFrameLayout.setOnClickListener(DoubleClickListener(callback = object : DoubleClickListener.Callback{
-            override fun doubleClicked() {
-                binding.playerview.showController()
-                binding.forwardButton.visibility=View.VISIBLE
-                player.seekTo(player.currentPosition + 10000)
+                }
+                createPlayer()
+                initilizeBinding()
+            } else {
+                initalizeLayout()
+                initilizeBinding()
             }
-        }))
+        } catch (e: Exception) {
+            Toast.makeText(this@PlayerActivity, e.toString(), Toast.LENGTH_SHORT).show()
+            Log.d("error", e.toString())
+        }
 
-        binding.rewindFrameLayout.setOnClickListener(DoubleClickListener(callback = object : DoubleClickListener.Callback{
-            override fun doubleClicked() {
-                binding.playerview.showController()
-                binding.rewindButton.visibility=View.VISIBLE
-                player.seekTo(player.currentPosition - 10000)
-            }
-        }))
 
     }
 
@@ -132,16 +175,17 @@ class PlayerActivity : AppCompatActivity() {
                 createPlayer()
             }
 
-            "nowPlaying"-> {
+            "nowPlaying" -> {
                 speed = 1.0f
-                binding.videoTitle.apply {
+                videoTitle.apply {
                     text = playerlist[position].title
                     isSelected = true
                 }
-                binding.playerview.player = player
+                DoubleTapEnable()
                 playVideo()
                 playInFullScreen(enable = isFullScreen)
-                setVisibility()
+                SeekBarFeatures()
+
             }
 
 
@@ -187,11 +231,11 @@ class PlayerActivity : AppCompatActivity() {
     private fun initilizeBinding() {
 
 
-        binding.backButton.setOnClickListener {
+        findViewById<ImageButton>(R.id.backButton).setOnClickListener {
             finish()
         }
 
-        binding.playPuuseButton.setOnClickListener {
+        playPuuseButton.setOnClickListener {
             if (player.isPlaying) {
                 pauseVideo()
             } else {
@@ -199,29 +243,29 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        binding.nextButton.setOnClickListener {
+        findViewById<ImageButton>(R.id.nextButton).setOnClickListener {
             nextAndPrevVideo()
         }
-        binding.prevButton.setOnClickListener {
+        findViewById<ImageButton>(R.id.prevButton).setOnClickListener {
             nextAndPrevVideo(false)
         }
 
         //for the repeat button
-        binding.repeatBtn.setOnClickListener {
+        findViewById<ImageButton>(R.id.repeatBtn).setOnClickListener {
 
             if (repeat) {
                 repeat = false
                 player.repeatMode = Player.REPEAT_MODE_OFF
-                binding.repeatBtn.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_off)
+                findViewById<ImageButton>(R.id.repeatBtn).setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_off)
             } else {
                 repeat = true
                 player.repeatMode = Player.REPEAT_MODE_ONE
-                binding.repeatBtn.setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
+                findViewById<ImageButton>(R.id.repeatBtn).setImageResource(com.google.android.exoplayer2.ui.R.drawable.exo_controls_repeat_all)
             }
         }
 
         //for the full screen
-        binding.fullscreenButton.setOnClickListener {
+        fullscreenButton.setOnClickListener {
             if (isFullScreen) {
                 isFullScreen = false
                 playInFullScreen(false)
@@ -233,7 +277,6 @@ class PlayerActivity : AppCompatActivity() {
 
         //for the lockButton
         binding.lockButton.setOnClickListener {
-
             if (!isLocked) {
                 //then hide it
                 isLocked = true
@@ -242,14 +285,13 @@ class PlayerActivity : AppCompatActivity() {
                 binding.lockButton.setImageResource(R.drawable.lock)
             } else {
                 isLocked = false
-                binding.playerview.showController()
                 binding.playerview.useController = true
+                binding.playerview.showController()
                 binding.lockButton.setImageResource(R.drawable.lock_open)
-
             }
         }
 
-        binding.moreFeatures.setOnClickListener {
+        findViewById<ImageButton>(R.id.moreFeatures).setOnClickListener {
             pauseVideo()
             //show the custom dailogue
             val customDialogue =
@@ -259,7 +301,7 @@ class PlayerActivity : AppCompatActivity() {
             val dilagoue =
                 MaterialAlertDialogBuilder(this).setView(customDialogue).setOnCancelListener {
                     playVideo()
-                    binding.playPuuseButton.visibility = View.VISIBLE
+                    playPuuseButton.visibility = View.VISIBLE
                 }
                     .setBackground(ColorDrawable(0x8021130d.toInt()))
                     .create()
@@ -455,12 +497,12 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun playVideo() {
-        binding.playPuuseButton.setImageResource(R.drawable.pause)
+        playPuuseButton.setImageResource(R.drawable.pause)
         player.play()
     }
 
     private fun pauseVideo() {
-        binding.playPuuseButton.setImageResource(R.drawable.play)
+        playPuuseButton.setImageResource(R.drawable.play)
         player.pause()
     }
 
@@ -475,13 +517,13 @@ class PlayerActivity : AppCompatActivity() {
         //initialize the trackSelector
         trackSelector = DefaultTrackSelector(this)
 
-        binding.videoTitle.apply {
+        videoTitle.apply {
             text = playerlist[position].title
             isSelected = true
         }
         player =
             SimpleExoPlayer.Builder(this@PlayerActivity).setTrackSelector(trackSelector).build()
-        binding.playerview.player = player
+        DoubleTapEnable()
         val mediaItem = com.google.android.exoplayer2.MediaItem.fromUri(playerlist[position].uri)
         player.setMediaItem(mediaItem)
         player.prepare()
@@ -498,9 +540,27 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
+
+        //for the seekbar preivew
+        SeekBarFeatures()
+        //listner for the playerview
+        binding.playerview.setControllerVisibilityListener {
+            when {
+                isLocked -> {
+                    binding.lockButton.visibility = View.VISIBLE
+                }
+
+                binding.playerview.isControllerVisible -> binding.lockButton.visibility =
+                    View.VISIBLE
+
+                else -> {
+                    binding.lockButton.visibility = View.GONE
+                }
+            }
+
+        }
         playInFullScreen(enable = isFullScreen)
-        setVisibility()
-        nowPlayingId= playerlist[position].id
+        nowPlayingId = playerlist[position].id
 
     }
 
@@ -509,43 +569,13 @@ class PlayerActivity : AppCompatActivity() {
         if (enable) {
             binding.playerview.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
             player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-            binding.fullscreenButton.setImageResource(R.drawable.fullscreen_exit)
+            fullscreenButton.setImageResource(R.drawable.fullscreen_exit)
 
         } else {
             binding.playerview.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
-            binding.fullscreenButton.setImageResource(R.drawable.fullscreen)
+            fullscreenButton.setImageResource(R.drawable.fullscreen)
         }
-    }
-
-    private fun setVisibility() {
-        runnable = Runnable {
-            if (binding.playerview.isControllerVisible) {
-                changeVisibilty(View.VISIBLE)
-            } else {
-                changeVisibilty(View.INVISIBLE)
-            }
-            Handler(Looper.getMainLooper()).postDelayed(runnable, 300)
-        }
-        Handler(Looper.getMainLooper()).postDelayed(runnable, 0)
-    }
-
-    private fun changeVisibilty(visibilty: Int) {
-        binding.topController.visibility = visibilty
-        binding.playPuuseButton.visibility = visibilty
-        binding.bottomController.visibility = visibilty
-        binding.lockButton.visibility = visibilty
-
-        binding.rewindButton.visibility=View.GONE
-        binding.forwardButton.visibility=View.GONE
-
-        if (isLocked) {
-            binding.lockButton.visibility = View.VISIBLE
-        }
-
-        //to dissable the forwad and backward when the screen is locked
-        binding.forwardFrameLayout.visibility=visibilty
-        binding.rewindFrameLayout.visibility=visibilty
     }
 
     private fun changeSpped(isSpeedIncrement: Boolean) {
@@ -564,24 +594,21 @@ class PlayerActivity : AppCompatActivity() {
         player.setPlaybackSpeed(speed)
     }
 
-
-
-
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
     ) {
-        if(pipStatus != 0){
+        if (pipStatus != 0) {
             finish()
             val intent = Intent(this, PlayerActivity::class.java)
-            when(pipStatus){
-                1 -> intent.putExtra("Class","FolderActivity")
-                2 -> intent.putExtra("Class","SearchedVideos")
-                3 -> intent.putExtra("Class","AllVideos")
+            when (pipStatus) {
+                1 -> intent.putExtra("Class", "FolderActivity")
+                2 -> intent.putExtra("Class", "SearchedVideos")
+                3 -> intent.putExtra("Class", "AllVideos")
             }
             startActivity(intent)
         }
-        if(!isInPictureInPictureMode) pauseVideo()
+        if (!isInPictureInPictureMode) pauseVideo()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         }
@@ -590,6 +617,8 @@ class PlayerActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         player.pause()
+
+        audioManager?.abandonAudioFocus(this)
     }
 
 
@@ -598,5 +627,91 @@ class PlayerActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        if (pipStatus != 0) {
+            finish()
+            val intent = Intent(this, PlayerActivity::class.java)
+            when (pipStatus) {
+                1 -> intent.putExtra("class", "FolderActivity")
+                2 -> intent.putExtra("class", "SearchedVideos")
+                3 -> intent.putExtra("class", "AllVideos")
+            }
+            startActivity(intent)
+        }
+        if (!isInPictureInPictureMode) pauseVideo()
+    }
 
+    override fun onAudioFocusChange(focusChange: Int) {
+        if (focusChange <= 0) pauseVideo()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (audioManager == null) {
+            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        }
+
+        audioManager!!.requestAudioFocus(
+            this,
+            AudioManager.STREAM_MUSIC,
+            AudioManager.AUDIOFOCUS_GAIN
+        )
+    }
+
+    //used to get path of video selected by user (if column data fails to get path)
+    private fun getPathFromURI(context: Context, uri: Uri): String {
+        var filePath = ""
+        // ExternalStorageProvider
+        val docId = DocumentsContract.getDocumentId(uri)
+        val split = docId.split(':')
+        val type = split[0]
+
+        return if ("primary".equals(type, ignoreCase = true)) {
+            "${Environment.getExternalStorageDirectory()}/${split[1]}"
+        } else {
+            //getExternalMediaDirs() added in API 21
+            val external = context.externalMediaDirs
+            if (external.size > 1) {
+                filePath = external[1].absolutePath
+                filePath = filePath.substring(0, filePath.indexOf("Android")) + split[1]
+            }
+            filePath
+        }
+    }
+
+
+    private fun DoubleTapEnable() {
+        binding.playerview.player = player
+        binding.ytOVerlay.performListener(object : YouTubeOverlay.PerformListener {
+            override fun onAnimationEnd() {
+                binding.ytOVerlay.visibility = View.INVISIBLE
+            }
+
+            override fun onAnimationStart() {
+                binding.ytOVerlay.visibility = View.VISIBLE
+            }
+
+        })
+
+        binding.ytOVerlay.player(player)
+    }
+
+    private fun SeekBarFeatures(){
+        findViewById<DefaultTimeBar>(com.google.android.exoplayer2.ui.R.id.exo_progress)
+            .addListener(object  : TimeBar.OnScrubListener{
+                override fun onScrubStart(timeBar: TimeBar, position: Long) {
+                    pauseVideo()
+                }
+
+                override fun onScrubMove(timeBar: TimeBar, position: Long) {
+                    player.seekTo(position)
+                }
+
+                override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+                    playVideo()
+                }
+
+            })
+    }
 }

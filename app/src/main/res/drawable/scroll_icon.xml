@@ -1,6 +1,6 @@
 <vector
     android:height="50dp"
-    android:tint="@color/cool_pink"
+    android:tint="?attr/ThemeColor"
     android:viewportHeight="24"
     android:viewportWidth="4"
     android:width="18dp"
